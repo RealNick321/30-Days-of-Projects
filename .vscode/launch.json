@@ -1,0 +1,12 @@
+{
+    "configurations": [
+        {
+            "name": "Python Debugger: Python File",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "python": "${workspaceFolder}/Day_6/venv312/Scripts/python.exe",
+            "cwd": "${workspaceFolder}/Day_6"
+        }
+    ]
+}
