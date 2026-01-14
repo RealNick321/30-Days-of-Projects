@@ -10,20 +10,14 @@ class AlphabeticalInput(Exception):
     """Raised when the user input is alphabetical, but not end"""
 class NumbandSpaceError(Exception):
     """Raised when user inputs a number, then a space, then a number"""
+class SymbolError(Exception):
+    """Raised when user inputs improper symbols"""
+    
 
 def main():
-    first_input = user_input_cleaning()
-    print(first_input)
+    answer = user_input_cleaning()
+    print(answer)
 
-    # writing out my problems
-        #I want to scan user input to make sure only numbers and certain symbols are entered, and one word (end), if not, retry with error message. 
-            #how can I scan this?
-                #char by char, if int, no issue, if allowed characters no issue, and if letters only error after a an or of a few conditions
-                    #1 1 letter then space
-                    #2 2 letters then space
-                    #3 3 letters then space that is not "end"
-                    #4 letter then number 
-                    #5 letter then symbol, even allowed symbol
 
 def user_input_cleaning():
     user_input_clean = False
@@ -43,6 +37,8 @@ def user_input_cleaning():
                 if 122 >= char >= 97:
                     if char != 101 and end_array["e"] == False:
                         raise AlphabeticalInput
+                    elif char == 101 and end_array["e"] == True:
+                        raise AlphabeticalInput
                     elif char == 101:
                         end_array["e"] = True
                         continue
@@ -57,7 +53,7 @@ def user_input_cleaning():
                         end_array["d"] == True
                         sys.exit()
                 if 57 >= char >= 48 and second_term_flag == False:
-                    if ord(initial[i - 1]) == 32 and 57 >= initial[i - 2] >= 48:
+                    if ord(initial[i - 1]) == 32 and 57 >= ord(initial[i - 2]) >= 48:
                         raise NumbandSpaceError
                     first_input.append(chr(char))
                     continue
@@ -82,6 +78,10 @@ def user_input_cleaning():
                 if 57 >= char >= 48:
                     second_number.append(chr(char))
                     continue
+                if 47 >= char >= 33 or 96 >= char >= 91 and i == 0:
+                    raise SymbolError
+            if len(initial) == 1 and 122 >= ord(initial) >= 97:
+                raise AlphabeticalInput
             user_input_clean = True
         except AlphabeticalInput:
             print("You have entered letter(s) that is not the end command. Please enter only numbers, allowed symbols, or end.")
@@ -89,11 +89,10 @@ def user_input_cleaning():
         except NumbandSpaceError:
             print("You have entered a number, then a space, then a number without an operating symbol (+, -, /, *) between them. Please try again")
             continue
-    first_int = int("".join(map(str, first_input)))
-    second_int = int("".join(map(str, second_number)))
-    if operator == 43:
-        answer = first_int + second_int
-    return answer
+        except SymbolError:
+            print("You have entered improper symbols. Please try again.")
+            continue
+    return first_input, second_number
 
         
 
@@ -105,3 +104,20 @@ def user_input():
 
 if __name__ == "__main__":
     main()
+
+
+
+
+#list of bugs:
+    """type e alone or in multiple successive inputs then type end and it will infi loop alphabeticalinput error
+    type en will go through entire program and print of empty supposed to be number list will occur
+    typing a number then space then an allowed operator sign
+    Prompts to enter values after the first prompt still contains Welcome to The Calculator!
+      """
+#things that are handled properly:
+    """typing random letters will return helpful instructions. Typing end after such error exits successfully. 
+    typing end will exit program
+    if a user types a two numbers seperated by 2 spaces without an operator sign, a specific error is returned
+    typing numbers then a space then letters still returns alphabetical error
+    If user enters symbols in beginning of prompt, symbol error is returned
+    """
