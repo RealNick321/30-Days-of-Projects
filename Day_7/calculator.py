@@ -11,54 +11,64 @@ class AlphabeticalInput(Exception):
 class NumbandSpaceError(Exception):
     """Raised when user inputs a number, then a space, then a number"""
 class SymbolError(Exception):
-    """Raised when user inputs improper symbols"""
+    """Raised when user inputs symbols at beginning of prompt"""
+
+Global_Vars = {
+    "first_input_recieved_flag": False,
+    "user_input_clean": False,
+    "end_array": {'e': False, 'n': False, 'd': False},
+    "first_term": [],
+    "space_detected": False,
+    "second_term_flag": False,
+    "second_term": [],
+    "operator": 0,
+    "letter": True,
+    "number": False,
+}
     
 
 def main():
-    answer = user_input_cleaning()
-    print(answer)
+    first, second = user_input_cleaning()
+    first, second = list_to_string(first, second)
 
 
 def user_input_cleaning():
-    user_input_clean = False
-    end_array = {'e': False, 'n': False, 'd': False}
-    first_input = []
-    space_detected = False
-    second_term_flag = False
-    second_number = []
-    operator = 0 
 
 
-    while user_input_clean == False:
+    while Global_Vars["user_input_clean"] == False:
         try:
-            initial = input("Welcome to The Calculator! Available operations include +, -, *, /, ^, and !. Decimals up to 9 places are calculated. You can operate on returned values. Type end to end program. Please enter your desired calculation\n").lower()
-            for i, char in enumerate(initial):
+            user_string = user_input_message()
+            for i, char in enumerate(user_string):
                 char = ord(char)
-                if 122 >= char >= 97:
-                    if char != 101 and end_array["e"] == False:
+                letter_detector(char)
+                number_detector(char)
+                if Global_Vars["letter"] == True:
+                    #left off here, maybe replace this indent with a letter handling function?
+                    if char != 101 and Global_Vars["end_array"]["e"] == False:
                         raise AlphabeticalInput
-                    elif char == 101 and end_array["e"] == True:
+                    elif char == 101 and Global_Vars["end_array"]["e"] == True:
                         raise AlphabeticalInput
                     elif char == 101:
-                        end_array["e"] = True
+                        Global_Vars["end_array"]["e"]  = True
                         continue
-                    elif char != 110 and end_array["n"] == False:
+                    elif char != 110 and Global_Vars["end_array"][""]  == False:
                         raise AlphabeticalInput
                     elif char == 110:
-                        end_array["n"] = True 
+                        Global_Vars["end_array"]["n"]  = True 
                         continue
-                    elif char != 100 and end_array["d"] == False:
+                    elif char != 100 and Global_Vars["end_array"]["d"]  == False:
                         raise AlphabeticalInput
                     elif char == 100:
-                        end_array["d"] == True
+                        Global_Vars["end_array"]["d"] == True
                         sys.exit()
+                #once above letter handling function done, continue on functionizing, starting with line 65
                 if 57 >= char >= 48 and second_term_flag == False:
-                    if ord(initial[i - 1]) == 32 and 57 >= ord(initial[i - 2]) >= 48:
+                    if ord(user_string[i - 1]) == 32 and 57 >= ord(user_string[i - 2]) >= 48:
                         raise NumbandSpaceError
-                    first_input.append(chr(char))
+                    Global_Vars["first_input"].append(chr(char))
                     continue
                 if char == 32:
-                    if 57 >= ord(initial[i - 1]) >= 48:
+                    if 57 >= ord(user_string[i - 1]) >= 48:
                         if second_term_flag == True:
                             print("Max of 2 terms to operate on for now")
                             break
@@ -66,23 +76,23 @@ def user_input_cleaning():
                         continue
                     if space_detected == True and second_term_flag == False:
                         user_input_clean = True
-                        print("Two spaced detected after numeric entry. Numeric entry saved. Type operation to perform on such number. If user was in-process of typing out full operation using double space format, type end and conform to single space moving forward.")
-                        return first_input
-                if ord(initial[i - 1]) == 32 and char == 43 or char == 47 or char == 42 or char == 45:
+                        print("Two spaces detected after numeric entry. Numeric entry saved. Type operation to perform on such number. If user was in-process of typing out full operation using double space format, type end and conform to single space moving forward.")
+                        return Global_Vars["first_input"] 
+                if ord(user_string[i - 1]) == 32 and char == 43 or char == 47 or char == 42 or char == 45:
                     second_term_flag = True
                     operator = char
                     continue
-                if ord(initial[i - 1]) == 32 and second_term_flag == True and 57 >= char >= 48:
-                    second_number.append(chr(char))
+                if ord(user_string[i - 1]) == 32 and second_term_flag == True and 57 >= char >= 48:
+                    Global_Vars["second_number"].append(chr(char))
                     continue
                 if 57 >= char >= 48:
-                    second_number.append(chr(char))
+                    Global_Vars["second_number"].append(chr(char))
                     continue
                 if 47 >= char >= 33 or 96 >= char >= 91 and i == 0:
                     raise SymbolError
-            if len(initial) == 1 and 122 >= ord(initial) >= 97:
+            if len(user_string) == 1 and 122 >= ord(user_string) >= 97:
                 raise AlphabeticalInput
-            user_input_clean = True
+            Global_Vars["user_input_clean"] = True
         except AlphabeticalInput:
             print("You have entered letter(s) that is not the end command. Please enter only numbers, allowed symbols, or end.")
             continue
@@ -90,15 +100,40 @@ def user_input_cleaning():
             print("You have entered a number, then a space, then a number without an operating symbol (+, -, /, *) between them. Please try again")
             continue
         except SymbolError:
-            print("You have entered improper symbols. Please try again.")
+            print("You have entered symbols at the beginning of your prompt. Please try again.")
             continue
-    return first_input, second_number
+    return Global_Vars["first_term"], Global_Vars["second_term"]
 
         
 
-def user_input():
-    input_string = input("Available operations include +, -, *, /, ^, and !. Decimals up to 9 places are calculated. Please enter your desired calculation\n").lower()
-    return input_string
+def user_input_message():
+    if Global_Vars["first_input_recieved_flag"] == False:
+        input_string = input("Welcome to The Calculator! Available operations include +, -, *, /, ^, and !. Decimals up to 9 places are calculated. You can operate on returned values. Type end to end program. Please enter your desired calculation\n").lower()
+        return input_string
+    else:
+        post_first_string = input("Available operations include +, -, *, /, ^, and !. Decimals up to 9 places are calculated. Please enter your desired calculation\n").lower()
+        return post_first_string
+
+def list_to_string(first, second):
+    first = int("".join(map(str, first)))
+    print(first)
+    return first, second 
+
+def letter_detector(char):
+    if 122 >= char >= 97:
+        Global_Vars["letter"] = True
+        return 
+
+def number_detector(char):
+    if 57 >= char >= 48:
+        Global_Vars["number"] = True
+        Global_Vars["letter"] = False
+        return 
+
+
+
+
+
 
 
 
