@@ -33,8 +33,6 @@ def main():
 
 
 def user_input_cleaning():
-
-
     while Global_Vars["user_input_clean"] == False:
         try:
             user_string = user_input_message()
@@ -43,50 +41,25 @@ def user_input_cleaning():
                 letter_detector(char)
                 number_detector(char)
                 if Global_Vars["letter"] == True:
-                    #left off here, maybe replace this indent with a letter handling function?
-                    if char != 101 and Global_Vars["end_array"]["e"] == False:
-                        raise AlphabeticalInput
-                    elif char == 101 and Global_Vars["end_array"]["e"] == True:
-                        raise AlphabeticalInput
-                    elif char == 101:
-                        Global_Vars["end_array"]["e"]  = True
-                        continue
-                    elif char != 110 and Global_Vars["end_array"][""]  == False:
-                        raise AlphabeticalInput
-                    elif char == 110:
-                        Global_Vars["end_array"]["n"]  = True 
-                        continue
-                    elif char != 100 and Global_Vars["end_array"]["d"]  == False:
-                        raise AlphabeticalInput
-                    elif char == 100:
-                        Global_Vars["end_array"]["d"] == True
-                        sys.exit()
-                #once above letter handling function done, continue on functionizing, starting with line 65
-                if 57 >= char >= 48 and second_term_flag == False:
-                    if ord(user_string[i - 1]) == 32 and 57 >= ord(user_string[i - 2]) >= 48:
-                        raise NumbandSpaceError
-                    Global_Vars["first_input"].append(chr(char))
-                    continue
-                if char == 32:
-                    if 57 >= ord(user_string[i - 1]) >= 48:
-                        if second_term_flag == True:
-                            print("Max of 2 terms to operate on for now")
-                            break
-                        space_detected = True
-                        continue
-                    if space_detected == True and second_term_flag == False:
-                        user_input_clean = True
-                        print("Two spaces detected after numeric entry. Numeric entry saved. Type operation to perform on such number. If user was in-process of typing out full operation using double space format, type end and conform to single space moving forward.")
-                        return Global_Vars["first_input"] 
+                    letter_handling(char)
+                NumberandSpaceError(i, char, user_string)
+                FirstTermBuilding(char)
+                if Space_Detected(char):
+                    if Max2Terms(i, char, user_string):
+                        break
+                    if LastCharNumber(i, user_string):
+                        if space_detected_flag():
+                            continue
+                    TwoSpacesHandling()
                 if ord(user_string[i - 1]) == 32 and char == 43 or char == 47 or char == 42 or char == 45:
-                    second_term_flag = True
+                    Global_Vars["second_term_flag"]= True
                     operator = char
                     continue
-                if ord(user_string[i - 1]) == 32 and second_term_flag == True and 57 >= char >= 48:
-                    Global_Vars["second_number"].append(chr(char))
+                if ord(user_string[i - 1]) == 32 and Global_Vars["second_term_flag"] == True and number_detector:
+                    Global_Vars["second_term"].append(chr(char))
                     continue
                 if 57 >= char >= 48:
-                    Global_Vars["second_number"].append(chr(char))
+                    Global_Vars["second_term"].append(chr(char))
                     continue
                 if 47 >= char >= 33 or 96 >= char >= 91 and i == 0:
                     raise SymbolError
@@ -130,11 +103,60 @@ def number_detector(char):
         Global_Vars["letter"] = False
         return 
 
+def letter_handling(char):
+    if char != 101 and Global_Vars["end_array"]["e"] == False:
+        raise AlphabeticalInput
+    elif char == 101 and Global_Vars["end_array"]["e"] == True:
+        raise AlphabeticalInput
+    elif char == 101:
+        Global_Vars["end_array"]["e"]  = True
+        return
+    elif char != 110 and Global_Vars["end_array"]["n"]  == False:
+        raise AlphabeticalInput
+    elif char == 110:
+        Global_Vars["end_array"]["n"]  = True 
+        return
+    elif char != 100 and Global_Vars["end_array"]["d"]  == False:
+        raise AlphabeticalInput
+    elif char == 100:
+        Global_Vars["end_array"]["d"] == True
+        sys.exit()
+    
+def NumberandSpaceError(i, char, user_string):
+    if 57 >= char >= 48 and Global_Vars["second_term_flag"] == False:
+        if ord(user_string[i - 1]) == 32 and 57 >= ord(user_string[i - 2]) >= 48:
+            raise NumbandSpaceError
 
+def FirstTermBuilding(char):
+    if 57 >= char >= 48 and Global_Vars["second_term_flag"] == False:
+        Global_Vars["first_term"].append(chr(char))
 
+def Max2Terms(i, char, user_string):
+    if LastCharNumber(i, user_string):
+        if Global_Vars["second_term_flag"] == True:
+            print("Max of 2 terms to operate on for now")
+            return True
 
+def Space_Detected(char):
+    if char == 32:
+        return True
 
+def LastCharNumber(i, user_string):
+    if 57 >= ord(user_string[i - 1]) >= 48:
+        return True
+    else:
+        return False 
 
+def space_detected_flag():
+    if Global_Vars["second_term_flag"] == False:
+        Global_Vars["space_detected"] = True
+        return True
+
+def TwoSpacesHandling():
+    if Global_Vars["space_detected"] == True and Global_Vars["second_term_flag"] == False:
+        Global_Vars["user_input_clean"]= True
+        print("Two spaces detected after one numeric entry. Numeric entry saved. Type operation to perform on such number. If user was in-process of typing out full operation using double space format, type end and conform to single space moving forward.")
+        return Global_Vars["first_term"] 
 
 
 if __name__ == "__main__":
@@ -148,6 +170,7 @@ if __name__ == "__main__":
     type en will go through entire program and print of empty supposed to be number list will occur
     typing a number then space then an allowed operator sign
     Prompts to enter values after the first prompt still contains Welcome to The Calculator!
+    typing a number then space then operator sign then space then a number yields two spaces error.
       """
 #things that are handled properly:
     """typing random letters will return helpful instructions. Typing end after such error exits successfully. 
