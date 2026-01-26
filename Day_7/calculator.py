@@ -43,28 +43,29 @@ def user_input_cleaning():
                 if Global_Vars["letter"] == True:
                     letter_handling(char)
                 NumberandSpaceError(i, char, user_string)
-                FirstTermBuilding(char)
+                if FirstTermBuilding(char):
+                    continue
                 if Space_Detected(char):
                     if Max2Terms(i, char, user_string):
                         break
                     if LastCharNumber(i, user_string):
-                        if space_detected_flag():
+                        if Space_Detected(char):
                             continue
-                    TwoSpacesHandling()
-                if ord(user_string[i - 1]) == 32 and char == 43 or char == 47 or char == 42 or char == 45:
+                    elif TwoSpacesHandling():
+                        break
+                    else:
+                        continue
+                if Operator_detector(i, char, user_string):
                     Global_Vars["second_term_flag"]= True
-                    operator = char
                     continue
-                if ord(user_string[i - 1]) == 32 and Global_Vars["second_term_flag"] == True and number_detector:
+                if Secondterm_flag(i, char, user_string):
                     Global_Vars["second_term"].append(chr(char))
                     continue
-                if 57 >= char >= 48:
+                if number_detector:
                     Global_Vars["second_term"].append(chr(char))
                     continue
-                if 47 >= char >= 33 or 96 >= char >= 91 and i == 0:
+                if firstcharsymbol_flag:
                     raise SymbolError
-            if len(user_string) == 1 and 122 >= ord(user_string) >= 97:
-                raise AlphabeticalInput
             Global_Vars["user_input_clean"] = True
         except AlphabeticalInput:
             print("You have entered letter(s) that is not the end command. Please enter only numbers, allowed symbols, or end.")
@@ -89,7 +90,9 @@ def user_input_message():
 
 def list_to_string(first, second):
     first = int("".join(map(str, first)))
+    second = int("".join(map(str, second)))
     print(first)
+    print(second)
     return first, second 
 
 def letter_detector(char):
@@ -101,7 +104,9 @@ def number_detector(char):
     if 57 >= char >= 48:
         Global_Vars["number"] = True
         Global_Vars["letter"] = False
-        return 
+        return True
+    else:
+        return False
 
 def letter_handling(char):
     if char != 101 and Global_Vars["end_array"]["e"] == False:
@@ -130,6 +135,7 @@ def NumberandSpaceError(i, char, user_string):
 def FirstTermBuilding(char):
     if 57 >= char >= 48 and Global_Vars["second_term_flag"] == False:
         Global_Vars["first_term"].append(chr(char))
+        return True
 
 def Max2Terms(i, char, user_string):
     if LastCharNumber(i, user_string):
@@ -139,7 +145,11 @@ def Max2Terms(i, char, user_string):
 
 def Space_Detected(char):
     if char == 32:
-        return True
+            Global_Vars["space_detected"] = True
+            return True
+    else:
+        Global_Vars["space_detected"] = False
+        return False
 
 def LastCharNumber(i, user_string):
     if 57 >= ord(user_string[i - 1]) >= 48:
@@ -147,10 +157,6 @@ def LastCharNumber(i, user_string):
     else:
         return False 
 
-def space_detected_flag():
-    if Global_Vars["second_term_flag"] == False:
-        Global_Vars["space_detected"] = True
-        return True
 
 def TwoSpacesHandling():
     if Global_Vars["space_detected"] == True and Global_Vars["second_term_flag"] == False:
@@ -158,6 +164,25 @@ def TwoSpacesHandling():
         print("Two spaces detected after one numeric entry. Numeric entry saved. Type operation to perform on such number. If user was in-process of typing out full operation using double space format, type end and conform to single space moving forward.")
         return Global_Vars["first_term"] 
 
+def Operator_detector(i, char, user_string):
+    if ord(user_string[i - 1]) == 32 and char == 43 or char == 47 or char == 42 or char == 45:
+        Global_Vars["operator"] = char
+        return True
+    else:
+        return False
+
+def Secondterm_flag(i, char, user_string):
+    if ord(user_string[i - 1]) == 32 and Global_Vars["second_term_flag"] == True and number_detector(char):
+        return True
+    else:
+        return False
+    
+def firstcharsymbol_flag(char, i):
+    if 47 >= char >= 33 or 96 >= char >= 91 and i == 0:
+        return True
+    else:
+        return False
+    
 
 if __name__ == "__main__":
     main()
